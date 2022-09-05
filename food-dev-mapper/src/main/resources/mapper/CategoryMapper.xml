@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ipisces42.mapper.CategoryMapper">
+    <resultMap id="BaseResultMap" type="com.ipisces42.pojo.Category">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="type" jdbcType="INTEGER" property="type"/>
+        <result column="father_id" jdbcType="INTEGER" property="fatherId"/>
+        <result column="logo" jdbcType="VARCHAR" property="logo"/>
+        <result column="slogan" jdbcType="VARCHAR" property="slogan"/>
+        <result column="cat_image" jdbcType="VARCHAR" property="catImage"/>
+        <result column="bg_color" jdbcType="VARCHAR" property="bgColor"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id,
+        `name`,
+        `type`,
+        father_id,
+        logo,
+        slogan,
+        cat_image,
+        bg_color
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from category
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete
+        from category
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.ipisces42.pojo.Category"
+            useGeneratedKeys="true">
+        insert into category (`name`, `type`, father_id,
+                              logo, slogan, cat_image,
+                              bg_color)
+        values (#{name,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{fatherId,jdbcType=INTEGER},
+                #{logo,jdbcType=VARCHAR}, #{slogan,jdbcType=VARCHAR}, #{catImage,jdbcType=VARCHAR},
+                #{bgColor,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.ipisces42.pojo.Category"
+            useGeneratedKeys="true">
+        insert into category
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">
+                `name`,
+            </if>
+            <if test="type != null">
+                `type`,
+            </if>
+            <if test="fatherId != null">
+                father_id,
+            </if>
+            <if test="logo != null">
+                logo,
+            </if>
+            <if test="slogan != null">
+                slogan,
+            </if>
+            <if test="catImage != null">
+                cat_image,
+            </if>
+            <if test="bgColor != null">
+                bg_color,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=INTEGER},
+            </if>
+            <if test="fatherId != null">
+                #{fatherId,jdbcType=INTEGER},
+            </if>
+            <if test="logo != null">
+                #{logo,jdbcType=VARCHAR},
+            </if>
+            <if test="slogan != null">
+                #{slogan,jdbcType=VARCHAR},
+            </if>
+            <if test="catImage != null">
+                #{catImage,jdbcType=VARCHAR},
+            </if>
+            <if test="bgColor != null">
+                #{bgColor,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.ipisces42.pojo.Category">
+        update category
+        <set>
+            <if test="name != null">
+                `name` = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                `type` = #{type,jdbcType=INTEGER},
+            </if>
+            <if test="fatherId != null">
+                father_id = #{fatherId,jdbcType=INTEGER},
+            </if>
+            <if test="logo != null">
+                logo = #{logo,jdbcType=VARCHAR},
+            </if>
+            <if test="slogan != null">
+                slogan = #{slogan,jdbcType=VARCHAR},
+            </if>
+            <if test="catImage != null">
+                cat_image = #{catImage,jdbcType=VARCHAR},
+            </if>
+            <if test="bgColor != null">
+                bg_color = #{bgColor,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.ipisces42.pojo.Category">
+        update category
+        set `name`    = #{name,jdbcType=VARCHAR},
+            `type`    = #{type,jdbcType=INTEGER},
+            father_id = #{fatherId,jdbcType=INTEGER},
+            logo      = #{logo,jdbcType=VARCHAR},
+            slogan    = #{slogan,jdbcType=VARCHAR},
+            cat_image = #{catImage,jdbcType=VARCHAR},
+            bg_color  = #{bgColor,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <select id="getSubCatList" resultMap="myCategory" parameterType="java.lang.Integer">
+        select c.id         as id,
+               c.name       as name,
+               c.type       as type,
+               c.father_id  as fatherId,
+               c2.id        as subId,
+               c2.name      as subName,
+               c2.father_id as subFatherId
+        from category c
+                 left join category c2 on c.id = c2.father_id
+        where c.father_id = #{fatherId,jdbcType=INTEGER}
+    </select>
+    <resultMap id="myCategory" type="com.ipisces42.dto.CategoryDTO">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="INTEGER"/>
+        <result column="fatherId" property="fatherId" jdbcType="INTEGER"/>
+        <collection property="subCatList" ofType="com.ipisces42.dto.SubCategoryDTO">
+            <id column="subId" property="subId" jdbcType="INTEGER"/>
+            <result column="subName" property="subName" jdbcType="VARCHAR"/>
+            <result column="subFatherId" property="subFatherId" jdbcType="INTEGER"/>
+        </collection>
+    </resultMap>
+
+    <select id="getSixNewItemsLazy" resultMap="myNewItemsDTO" parameterType="Map">
+        select c.id           as rootCatId,
+               c.name         as rootCatName,
+               c.slogan       as slogan,
+               c.cat_image    as catImage,
+               c.bg_color     as bgColor,
+               i.id           as itemId,
+               i.item_name    as itemName,
+               ii.url         as itemUrl
+        from foodie.category c
+                 left join items i on c.id = i.root_cat_id
+                 left join items_img ii on ii.item_id = i.id
+        where c.type = 1
+          and i.root_cat_id = #{paramsMap.rootCatId}
+          and ii.is_main = 1
+        order by i.created_time desc
+        limit 0,6
+    </select>
+    <resultMap id="myNewItemsDTO" type="com.ipisces42.dto.NewItemsDTO">
+        <id column="rootCatId" property="rootCatId"/>
+        <result column="rootCatName" property="rootCatName"/>
+        <result column="slogan" property="slogan"/>
+        <result column="bgColor" property="bgColor"/>
+        <result column="catImage" property="catImage"/>
+        <collection property="simpleItemList" ofType="com.ipisces42.dto.NewItemsDTO$SimpleItemDTO">
+            <id column="itemId" property="itemId"/>
+            <result column="itemName" property="itemName"/>
+            <result column="itemUrl" property="itemUrl"/>
+        </collection>
+    </resultMap>
+</mapper>
